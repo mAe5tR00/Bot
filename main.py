@@ -1,20 +1,19 @@
 import asyncio
 import logging
 import sys
-from os import getenv
+import os
 
-from aiogram import Bot, Dispatcher, html
-from aiogram.client.default import DefaultBotProperties
+from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
-# Токен бота (установи через переменную окружения BOT_TOKEN)
-TOKEN = getenv("6600994228:AAEKvdJCVZPCBXkP3ylfFW9jHqS-l0U1WPo")
+# Получаем токен из переменной окружения
+TOKEN = os.getenv("6909049704:AAGeTidLhxR7uQoHNlsz4IU9SoD8OW9PMpo")
 
-# Проверка токена
-if TOKEN is None:
+# Проверяем токен
+if not TOKEN:
     print("❌ ОШИБКА: Токен бота не найден!")
     print("Установите переменную окружения BOT_TOKEN")
     sys.exit(1)
@@ -24,50 +23,45 @@ dp = Dispatcher()
 
 # Обработчик команды /start
 @dp.message(CommandStart())
-async def command_start_handler(message: Message) -> None:
+async def start_command(message: Message) -> None:
     """
-    Приветственное сообщение с HTML-разметкой и кнопкой
+    Приветственное сообщение с кнопкой
     """
-    # Создаем клавиатуру с одной кнопкой
+    # Создаем клавиатуру
     builder = ReplyKeyboardBuilder()
     builder.button(text="🛒 Открыть Маркет")
     
-    # Текст сообщения с HTML-разметкой
+    # Текст сообщения с HTML разметкой
     welcome_text = (
-        html.bold("🌟 Добро пожаловать в наш магазин!") + "\n\n" +
-        html.bold("✨ Здесь вы можете:") + "\n" +
-        "• 🛍️ " + html.italic("Просматривать каталог товаров") + "\n" +
-        "• 🔥 " + html.italic("Участвовать в акциях") + "\n" +
-        "• 📦 " + html.italic("Отслеживать свои заказы") + "\n" +
-        "• 💰 " + html.italic("Копить бонусы") + "\n" +
-        "• 🚚 " + html.italic("Заказывать доставку") + "\n\n" +
-        html.bold("Нажмите кнопку ") + html.code("Открыть Маркет") +
-        html.bold(" и совершите свою первую покупку!")
+        "<b>🌟 Добро пожаловать в наш магазин!</b>\n\n"
+        "<b>✨ Здесь вы можете:</b>\n"
+        "• 🛍️ <i>Просматривать каталог товаров</i>\n"
+        "• 🔥 <i>Участвовать в акциях</i>\n"
+        "• 📦 <i>Отслеживать свои заказы</i>\n"
+        "• 💰 <i>Копить бонусы</i>\n"
+        "• 🚚 <i>Заказывать доставку</i>\n\n"
+        "Нажмите кнопку <code>Открыть Маркет</code> "
+        "и совершите свою первую покупку!"
     )
     
-    # Отправляем сообщение с клавиатурой
     await message.answer(
         welcome_text,
+        parse_mode=ParseMode.HTML,
         reply_markup=builder.as_markup(resize_keyboard=True)
     )
 
-# Простой эхо-обработчик для других сообщений
+# Эхо-обработчик
 @dp.message()
-async def echo_handler(message: Message) -> None:
-    """
-    Простой эхо-ответ
-    """
+async def echo_message(message: Message) -> None:
     if message.text:
-        await message.answer(f"Вы написали: {html.quote(message.text)}")
+        await message.answer(f"Вы написали: {message.text}")
 
 async def main() -> None:
-    # Инициализируем бота с HTML-парсингом по умолчанию
-    bot = Bot(
-        token=TOKEN, 
-        default=DefaultBotProperties(parse_mode=ParseMode.HTML)
-    )
+    # Инициализируем бота
+    bot = Bot(token=TOKEN, parse_mode=ParseMode.HTML)
     
-    print("🤖 Бот запущен...")
+    print("🤖 Бот запущен и готов к работе...")
+    print(f"Bot ID: {(await bot.get_me()).id}")
     
     # Запускаем поллинг
     await dp.start_polling(bot)
@@ -76,15 +70,8 @@ if __name__ == "__main__":
     # Настраиваем логирование
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.StreamHandler(sys.stdout),
-            logging.FileHandler("bot.log")
-        ]
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
     
-    try:
-        # Запускаем бота
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("\n👋 Бот остановлен")
+    # Запускаем приложение
+    asyncio.run(main())
