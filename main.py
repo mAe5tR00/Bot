@@ -1,37 +1,28 @@
 import asyncio
-import logging
-import sys
 import os
-
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
 from aiogram.types import Message
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 # Получаем токен из переменной окружения
-TOKEN = os.getenv("6909049704:AAGeTidLhxR7uQoHNlsz4IU9SoD8OW9PMpo")
+TOKEN = os.getenv("6600994228:AAEKvdJCVZPCBXkP3ylfFW9jHqS-l0U1WPo")
 
-# Проверяем токен
+# Проверка токена
 if not TOKEN:
     print("❌ ОШИБКА: Токен бота не найден!")
     print("Установите переменную окружения BOT_TOKEN")
-    sys.exit(1)
+    exit(1)
 
-# Создаем диспетчер
+# Создаем бота и диспетчер
+bot = Bot(token=TOKEN, parse_mode=ParseMode.HTML)
 dp = Dispatcher()
 
-# Обработчик команды /start
 @dp.message(CommandStart())
-async def start_command(message: Message) -> None:
+async def start_command(message: Message):
     """
-    Приветственное сообщение с кнопкой
+    Приветственное сообщение при команде /start
     """
-    # Создаем клавиатуру
-    builder = ReplyKeyboardBuilder()
-    builder.button(text="🛒 Открыть Маркет")
-    
-    # Текст сообщения с HTML разметкой
     welcome_text = (
         "<b>🌟 Добро пожаловать в наш магазин!</b>\n\n"
         "<b>✨ Здесь вы можете:</b>\n"
@@ -44,34 +35,22 @@ async def start_command(message: Message) -> None:
         "и совершите свою первую покупку!"
     )
     
-    await message.answer(
-        welcome_text,
-        parse_mode=ParseMode.HTML,
-        reply_markup=builder.as_markup(resize_keyboard=True)
-    )
+    await message.answer(welcome_text)
 
-# Эхо-обработчик
 @dp.message()
-async def echo_message(message: Message) -> None:
+async def echo_handler(message: Message):
+    """
+    Эхо-ответ на все остальные сообщения
+    """
     if message.text:
         await message.answer(f"Вы написали: {message.text}")
 
-async def main() -> None:
-    # Инициализируем бота
-    bot = Bot(token=TOKEN, parse_mode=ParseMode.HTML)
-    
-    print("🤖 Бот запущен и готов к работе...")
-    print(f"Bot ID: {(await bot.get_me()).id}")
-    
-    # Запускаем поллинг
+async def main():
+    """
+    Основная функция запуска бота
+    """
+    print("🤖 Бот запущен...")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    # Настраиваем логирование
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
-    
-    # Запускаем приложение
     asyncio.run(main())
