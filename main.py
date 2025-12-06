@@ -11,7 +11,7 @@ from aiogram.types import Message
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 # Токен бота (установи через переменную окружения BOT_TOKEN)
-TOKEN = getenv("BOT_TOKEN")
+TOKEN = getenv("6600994228:AAEKvdJCVZPCBXkP3ylfFW9jHqS-l0U1WPo")
 
 # Создаем диспетчер
 dp = Dispatcher()
@@ -76,3 +76,4 @@ if __name__ == "__main__":
     
     # Запускаем бота
     asyncio.run(main())
+
