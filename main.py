@@ -13,6 +13,12 @@ from aiogram.utils.keyboard import ReplyKeyboardBuilder
 # Токен бота (установи через переменную окружения BOT_TOKEN)
 TOKEN = getenv("6600994228:AAEKvdJCVZPCBXkP3ylfFW9jHqS-l0U1WPo")
 
+# Проверка токена
+if TOKEN is None:
+    print("❌ ОШИБКА: Токен бота не найден!")
+    print("Установите переменную окружения BOT_TOKEN")
+    sys.exit(1)
+
 # Создаем диспетчер
 dp = Dispatcher()
 
@@ -27,29 +33,32 @@ async def command_start_handler(message: Message) -> None:
     builder.button(text="🛒 Открыть Маркет")
     
     # Текст сообщения с HTML-разметкой
-    welcome_text = html.bold("🌟 Добро пожаловать в наш магазин!") + "\n\n" + \
-                   html.bold("✨ Здесь вы можете:") + "\n" + \
-                   "• 🛍️ " + html.italic("Просматривать каталог товаров") + "\n" + \
-                   "• 🔥 " + html.italic("Участвовать в акциях") + "\n" + \
-                   "• 📦 " + html.italic("Отслеживать свои заказы") + "\n" + \
-                   "• 💰 " + html.italic("Копить бонусы") + "\n" + \
-                   "• 🚚 " + html.italic("Заказывать доставку") + "\n\n" + \
-                   html.bold("Нажмите кнопку ") + html.code("Открыть Маркет") + \
-                   html.bold(" и совершите свою первую покупку!")
+    welcome_text = (
+        html.bold("🌟 Добро пожаловать в наш магазин!") + "\n\n" +
+        html.bold("✨ Здесь вы можете:") + "\n" +
+        "• 🛍️ " + html.italic("Просматривать каталог товаров") + "\n" +
+        "• 🔥 " + html.italic("Участвовать в акциях") + "\n" +
+        "• 📦 " + html.italic("Отслеживать свои заказы") + "\n" +
+        "• 💰 " + html.italic("Копить бонусы") + "\n" +
+        "• 🚚 " + html.italic("Заказывать доставку") + "\n\n" +
+        html.bold("Нажмите кнопку ") + html.code("Открыть Маркет") +
+        html.bold(" и совершите свою первую покупку!")
+    )
     
     # Отправляем сообщение с клавиатурой
     await message.answer(
         welcome_text,
-        reply_markup=builder.as_markup(resize_keyboard=True, one_time_keyboard=True)
+        reply_markup=builder.as_markup(resize_keyboard=True)
     )
 
-# Простой эхо-обработчик для других сообщений (опционально)
+# Простой эхо-обработчик для других сообщений
 @dp.message()
 async def echo_handler(message: Message) -> None:
     """
     Простой эхо-ответ
     """
-    await message.answer(f"Вы написали: {html.quote(message.text)}")
+    if message.text:
+        await message.answer(f"Вы написали: {html.quote(message.text)}")
 
 async def main() -> None:
     # Инициализируем бота с HTML-парсингом по умолчанию
@@ -58,6 +67,8 @@ async def main() -> None:
         default=DefaultBotProperties(parse_mode=ParseMode.HTML)
     )
     
+    print("🤖 Бот запущен...")
+    
     # Запускаем поллинг
     await dp.start_polling(bot)
 
@@ -65,14 +76,15 @@ if __name__ == "__main__":
     # Настраиваем логирование
     logging.basicConfig(
         level=logging.INFO,
-        stream=sys.stdout,
-        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[
+            logging.StreamHandler(sys.stdout),
+            logging.FileHandler("bot.log")
+        ]
     )
     
-    # Проверка токена
-    if TOKEN is None:
-        logging.error("Токен бота не найден! Установите переменную окружения BOT_TOKEN.")
-        sys.exit(1)
-    
-    # Запускаем бота
-    asyncio.run(main())
+    try:
+        # Запускаем бота
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\n👋 Бот остановлен")
